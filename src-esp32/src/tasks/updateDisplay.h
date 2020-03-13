@@ -3,10 +3,11 @@
 
 #include <Arduino.h>
 #include <Adafruit_SSD1306.h>
+#include <U8g2lib.h>
 #include "functions/drawFunctions.h"
 #include "../config/config.h"
 
-extern Adafruit_SSD1306 display;
+extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
 extern DisplayValues gDisplayValues;
 
 /**
@@ -16,7 +17,7 @@ extern DisplayValues gDisplayValues;
 void updateDisplay(void * parameter){
   for (;;){
     serial_println(F("[LCD] Updating..."));
-    display.clearDisplay();
+    u8g2.clearBuffer();
 
     if(gDisplayValues.currentState == CONNECTING_WIFI || 
         gDisplayValues.currentState == CONNECTING_AWS){
@@ -30,7 +31,7 @@ void updateDisplay(void * parameter){
       drawMeasurementProgress();
     }
 
-    display.display();
+    u8g2.sendBuffer();
 
     // Sleep for 2 seconds, then update display again!
     vTaskDelay(2000 / portTICK_PERIOD_MS);

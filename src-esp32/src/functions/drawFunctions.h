@@ -3,17 +3,18 @@
 
 #include <WiFi.h>
 #include <Adafruit_SSD1306.h>
+#include <U8g2lib.h>
 #include "../config/enums.h"
 #include "../config/config.h"
 
-extern Adafruit_SSD1306 display;
+extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
 extern DisplayValues gDisplayValues;
 extern unsigned char measureIndex;
 
 void drawTime(){
-  display.setTextSize(1);
-  display.setCursor(0, 0);
-  display.print(gDisplayValues.time);
+  u8g2.setFont(u8g2_font_6x13_tf); //u8g2.setTextSize(1);
+  u8g2.setCursor(0, 0);
+  u8g2.print(gDisplayValues.time);
 }
 
 void drawSignalStrength(){
@@ -21,30 +22,38 @@ void drawSignalStrength(){
   const byte X_SPACING = 2;
 
   // Draw the four base rectangles
-  display.fillRect(X, 8-2, 1, 2, WHITE); // Bar 1
-  display.fillRect(X + X_SPACING, 8-2, 1, 2, WHITE); // Bar 2
-  display.fillRect(X + X_SPACING*2, 8-2, 1, 2, WHITE); // Bar 3
-  display.fillRect(X + X_SPACING*3, 8-2, 1, 2, WHITE); // Bar 4
+  u8g2.drawBox(X, 8-2, 1, 2);  //Bar 1
+  u8g2.drawBox(X + X_SPACING, 8-2, 1, 2); // Bar 2
+  u8g2.drawBox(X + X_SPACING*2, 8-2, 1, 2); // Bar 3
+  u8g2.drawBox(X + X_SPACING*3, 8-2, 1, 2); // Bar 4
+  //u8g2.fillRect(X, 8-2, 1, 2, WHITE); // Bar 1
+  //u8g2.fillRect(X + X_SPACING, 8-2, 1, 2, WHITE); // Bar 2
+  //u8g2.fillRect(X + X_SPACING*2, 8-2, 1, 2, WHITE); // Bar 3
+  //u8g2.fillRect(X + X_SPACING*3, 8-2, 1, 2, WHITE); // Bar 4
 
   // Draw bar 2
   if(gDisplayValues.wifi_strength > -70){
-    display.fillRect(X+X_SPACING, 8-4, 1, 4, WHITE);
+    u8g2.drawBox(X+X_SPACING, 8-4, 1, 4);
+    //u8g2.fillRect(X+X_SPACING, 8-4, 1, 4, WHITE);
   }
 
   // Draw bar 3
   if(gDisplayValues.wifi_strength > -60){
-    display.fillRect(X+X_SPACING*2, 8-6, 1, 6, WHITE);
+    u8g2.drawBox(X+X_SPACING*2, 8-6, 1, 6);
+    //u8g2.fillRect(X+X_SPACING*2, 8-6, 1, 6, WHITE);
   }
 
   // Draw bar 4
   if(gDisplayValues.wifi_strength >= -50){
-    display.fillRect(X+X_SPACING*3, 8-8, 1, 8, WHITE);
+    u8g2.drawBox(X+X_SPACING*3, 8-8, 1, 8);
+    //u8g2.fillRect(X+X_SPACING*3, 8-8, 1, 8, WHITE);
   }
 }
 
 void drawMeasurementProgress(){
   const byte Y = SCREEN_WIDTH - 20;
-  display.drawRect(0, Y, measureIndex*2, 2, WHITE);
+  u8g2.drawBox(0, Y, measureIndex*2, 2);
+  //u8g2.drawRect(0, Y, measureIndex*2, 2, WHITE);
 }
 
 /**
@@ -59,26 +68,31 @@ void drawBootscreen(){
   byte HEIGHT_STEP = 10;
   byte X_SPACING = 10;
 
-  display.fillRect(X              , Y, WIDTH, MAX_HEIGHT - HEIGHT_STEP*3, WHITE);
-  display.fillRect(X + X_SPACING  , Y - HEIGHT_STEP, WIDTH, MAX_HEIGHT - HEIGHT_STEP*2, WHITE);
-  display.fillRect(X + X_SPACING*2, Y - HEIGHT_STEP*2, WIDTH, MAX_HEIGHT - HEIGHT_STEP, WHITE);
-  display.fillRect(X + X_SPACING*3, Y - HEIGHT_STEP*3, WIDTH, MAX_HEIGHT, WHITE);
+  u8g2.drawBox(X,Y,WIDTH,MAX_HEIGHT - HEIGHT_STEP*3);
+  u8g2.drawBox(X + X_SPACING,Y - HEIGHT_STEP,WIDTH,MAX_HEIGHT - HEIGHT_STEP*2);
+  u8g2.drawBox(X + X_SPACING*2,Y - HEIGHT_STEP*2,WIDTH,MAX_HEIGHT - HEIGHT_STEP);
+  u8g2.drawBox(X + X_SPACING*3,Y - HEIGHT_STEP*3,WIDTH,MAX_HEIGHT);
 
-  display.setTextSize(1);
-  display.setCursor(0, Y + MAX_HEIGHT / 2);
-  display.println("Connecting");
+  //u8g2.fillRect(X              , Y, WIDTH, MAX_HEIGHT - HEIGHT_STEP*3, WHITE);
+  //u8g2.fillRect(X + X_SPACING  , Y - HEIGHT_STEP, WIDTH, MAX_HEIGHT - HEIGHT_STEP*2, WHITE);
+  //u8g2.fillRect(X + X_SPACING*2, Y - HEIGHT_STEP*2, WIDTH, MAX_HEIGHT - HEIGHT_STEP, WHITE);
+  //u8g2.fillRect(X + X_SPACING*3, Y - HEIGHT_STEP*3, WIDTH, MAX_HEIGHT, WHITE);
+
+  u8g2.setFont(u8g2_font_6x13_tf);
+  u8g2.setCursor(0, Y + MAX_HEIGHT / 2);
+  u8g2.println("Connecting");
 
   if(gDisplayValues.currentState == CONNECTING_WIFI){
-    display.println("   WiFi");
+    u8g2.println("   WiFi");
   }
 
   if(gDisplayValues.currentState == CONNECTING_AWS){
-    display.println("   AWS");
+    u8g2.println("   AWS");
   }
 }
 
 /**
- * Draw the current amps & watts in the middle of the display.
+ * Draw the current amps & watts in the middle of the u8g2.
  */
 void drawAmpsWatts(){
 
@@ -99,21 +113,21 @@ void drawAmpsWatts(){
   int widthWatts = watts.length() * 12 - 1;
   int widthLblWatts = lblWatts.length() * 6 -1;
 
-  display.setTextSize(2);
-  display.setCursor((SCREEN_HEIGHT - widthAmps) / 2, startY);
-  display.print(amps);
+  u8g2.setFont(u8g2_font_ncenR12_tf);
+  u8g2.setCursor((SCREEN_HEIGHT - widthAmps) / 2, startY);
+  u8g2.print(amps);
 
-  display.setTextSize(1);
-  display.setCursor((SCREEN_HEIGHT - widthLblAmps) / 2, startY + 15);
-  display.print(lblAmps);
+  u8g2.setFont(u8g2_font_6x13_tf);
+  u8g2.setCursor((SCREEN_HEIGHT - widthLblAmps) / 2, startY + 15);
+  u8g2.print(lblAmps);
 
-  display.setTextSize(2);
-  display.setCursor((SCREEN_HEIGHT - widthWatts) / 2, startY + 40);
-  display.print(watts);
+  u8g2.setFont(u8g2_font_ncenR12_tf);
+  u8g2.setCursor((SCREEN_HEIGHT - widthWatts) / 2, startY + 40);
+  u8g2.print(watts);
 
-  display.setTextSize(1);
-  display.setCursor((SCREEN_HEIGHT - widthLblWatts) / 2, startY + 60);
-  display.print(lblWatts);
+  u8g2.setFont(u8g2_font_6x13_tf);
+  u8g2.setCursor((SCREEN_HEIGHT - widthLblWatts) / 2, startY + 60);
+  u8g2.print(lblWatts);
 }
 
 #endif

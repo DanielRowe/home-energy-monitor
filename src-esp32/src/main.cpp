@@ -5,8 +5,7 @@
 #include "config/config.h"
 #include "config/enums.h"
 #include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include <U8g2lib.h>
 
 #include "tasks/updateDisplay.h"
 #include "tasks/fetch-time-from-ntp.h"
@@ -16,10 +15,12 @@
 #include "tasks/measure-electricity.h"
 #include "tasks/mqtt-home-assistant.h"
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+//Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, 16, 15, 4);
 DisplayValues gDisplayValues;
 EnergyMonitor emon1;
 
+  
 // Place to store local measurements before sending them off to AWS
 unsigned short measurements[LOCAL_MEASUREMENTS];
 unsigned char measureIndex = 0;
@@ -36,24 +37,31 @@ void setup()
   pinMode(ADC_INPUT, INPUT);
 
   // i2c for the OLED panel
-  Wire.begin(5, 4); 
+  //Wire.begin(5, 4); 
 
-  // Initialize the display
-  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C, false, false)) {
-    serial_println(F("SSD1306 allocation failed"));
-    delay(10*1000);
-    ESP.restart();
+  // Serial.
+  
+  Serial.begin(115200);
+  while(!Serial)
+  {
+    Serial.print('.');
   }
 
+  // OLED graphics.
+  
+  u8g2.begin();
+  u8g2.setFont(u8g2_font_6x10_tr);
+  u8g2.setFontRefHeightExtendedText();
+  u8g2.setDrawColor(1);
+  u8g2.setFontPosTop();
+  u8g2.setFontDirection(0);
+  u8g2.setDisplayRotation(U8G2_R1);
+
   // Init the display
-  display.clearDisplay();
-  display.setRotation(3);
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setTextWrap(false);
+  u8g2.clearBuffer();
 
   // Initialize emon library
-  emon1.current(ADC_INPUT, 30);
+  emon1.current(ADC_INPUT, 100);
 
   // ----------------------------------------------------------------
   // TASK: Connect to WiFi & keep the connection alive.

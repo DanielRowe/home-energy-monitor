@@ -34,7 +34,7 @@ void measureElectricity(void * parameter)
             xTaskCreate(
               uploadMeasurementsToAWS,
               "Upload measurements to AWS",
-              10000,             // Stack size (bytes)
+              10000,             // Stack size (bytes )
               NULL,             // Parameter
               5,                // Task priority
               NULL              // Task handle
