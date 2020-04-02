@@ -19,6 +19,8 @@
 
 ESP32-based Home Energy Monitor: monitors electricity consumption of your entire house with a single CT sensor.
 
+This is a fork of Savjee/home-energy-monitor for U8G2 displays.
+
 ## Structure
 
 This project consists out of multiple components:
